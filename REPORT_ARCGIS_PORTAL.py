@@ -4,14 +4,10 @@ from arcgis.mapping import WebMap
 import os
 import pandas as pd
 
-url = '' #change this url
-username = '' #change this username
-password = '' #change this password
-gis = GIS(url, username, password)
+def main(url, username, password, reportingPath):
+    gis = GIS(url, username, password)
+    reportingPath = os.getcwd() # change this path if you want to save other address
 
-reportingPath = os.getcwd() # change this path if you want to save other address
-
-def main():
     reportingFile = 'reporting'
     itemTypeGIS = ['Feature Layer', 'Geoprocessing Toolbox', 'Map Image Layer', 'Data Store', 'Web Map',
             'Web Experience', 'Dashboard']
@@ -87,9 +83,16 @@ def main():
 
 if __name__ == '__main__':
     startTime = datetime.today()
+    url = '' #change this url
+    username = '' #change this username
+    password = '' #change this password
+
+    reportingPath = os.getcwd()
+
     try:
         print('Starting to process')
-        main()
+        main(url, username, password, reportingPath)
+
         print('End of the process')
         endTime = datetime.today()
         deltaTime = endTime - startTime

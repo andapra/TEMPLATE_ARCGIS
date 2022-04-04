@@ -6,18 +6,15 @@ import os
 import pandas as pd
 import json
 
-portal = '' ## input portal url example: https://gis.portal.com/webadaptor
-username = '' ## username portal that can access username
-password = '' ## password of the username
-gis = GIS(portal, username, password)
 
-reportingPath = os.getcwd() # change this path if you want to save other address
 
-# will connect to arcgis server index 0, usually the arcgis server base deployment, you can change the other index 
-gis_server = gis.admin.servers.list()[0]
-service_folder = gis_server.services.folders
+def main(portal, username, password, reportingPath):
+    gis = GIS(portal, username, password)
 
-def main():
+    # will connect to arcgis server index 0, usually the arcgis server base deployment, you can change the other index 
+    gis_server = gis.admin.servers.list()[0]
+    service_folder = gis_server.services.folders
+
     df = pd.DataFrame(columns=[])
     df_properties = pd.DataFrame(columns=[])
     df_portalproperties = pd.DataFrame(columns=[])
@@ -124,10 +121,15 @@ def main():
 
 if __name__ == '__main__':
     startTime = datetime.today()
-    
+    portal = '' ## input portal url example: https://gis.portal.com/webadaptor
+    username = '' ## username portal that can access username
+    password = '' ## password of the username
+
+    reportingPath = os.getcwd() # change this path if you want to save other address
+
     try:
         print('Starting to process')
-        main()
+        main(portal, username, password, reportingPath)
         print('End of the process')
         endTime = datetime.today()
         deltaTime = endTime - startTime
