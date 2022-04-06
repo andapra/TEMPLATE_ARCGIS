@@ -12,7 +12,7 @@ class reporting_portal():
         self.reportingPath = reportingPath
 
     def main(self):
-        gis = GIS(self.url, self.username, self.password)
+        gis = GIS(self.portal, self.username, self.password)
         reportingPath = self.reportingPath # change this path if you want to save other address
 
         reportingFile = 'reporting'
