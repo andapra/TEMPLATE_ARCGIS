@@ -24,6 +24,7 @@ class reporting_portal():
         listUsers = gis.users.search(query=None)
         for user in listUsers:
             getUser = user['username']
+            print('============= {} ============='.format(getUser))
 
             for item in itemTypeGIS:
                 getItemType = item
@@ -37,6 +38,7 @@ class reporting_portal():
                             getData = contentGIS[i]['title']
                             getItem = contentGIS[i].id
 
+                            print(getItemType, getData, getItem)
                             listLayerURL = []
                             try:
                                 getLayers = WebMap(contentGIS[i]).layers
@@ -66,6 +68,7 @@ class reporting_portal():
                             getData = contentGIS[i]['title']
                             getItem = contentGIS[i].id
 
+                            print(getData, getItem)
                             itemStatus = Item(gis, contentGIS[i].id)
                             shareStatus = itemStatus.shared_with
                             shareStatus_Public = shareStatus['everyone']
@@ -82,6 +85,8 @@ class reporting_portal():
 
                             listRAW.append(contentGIS[i])
 
+            print('============= {} ============='.format(getUser))
+
         df = pd.DataFrame(columns = ['title', 'type', 'owner', 'url', 'itemid', 'shared_public',
                                     'shared_org', 'shared_groups','layers'])
         dfAppend = df.append(listService, ignore_index=True)
@@ -94,7 +99,7 @@ if __name__ == '__main__':
     portal = '' ## input portal url example: https://gis.portal.com/webadaptor
     username = '' ## username portal that can access username
     password = '' ## password of the username
-    export_path = os.getcwd() # change this path if you want to save other address
+    export_path = os.getcwd()  # change this path if you want to save other address
     
     information = reporting_portal(portal, username, password, export_path) 
 
