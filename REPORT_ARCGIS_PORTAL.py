@@ -21,7 +21,7 @@ class reporting_portal():
 
         listRAW = []
         listService = []
-        listUsers = gis.users.search('')
+        listUsers = gis.users.search(query=None)
         for user in listUsers:
             getUser = user['username']
 
