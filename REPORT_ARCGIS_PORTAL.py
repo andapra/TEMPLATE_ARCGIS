@@ -96,11 +96,16 @@ class reporting_portal():
 if __name__ == '__main__':
     startTime = datetime.today()
 
-    portal = '' ## input portal url example: https://gis.portal.com/webadaptor
-    username = '' ## username portal that can access username
-    password = '' ## password of the username
-    export_path = os.getcwd()  # change this path if you want to save other address
-    
+    portal = input("Input portal url <example: https://gis.portal.com/webadaptor>: ") ## input portal url example: https://gis.portal.com/webadaptor
+    username = input("Input portal username: ") ## username portal that can access username
+    password = input("Input password: ") ## password of the username
+    saving_file = input("Input full path address <press enter if you wan to pass it to default in the current folder>: ")
+
+    if saving_file is None or saving_file == '':
+        export_path = os.getcwd() 
+    else:
+        export_path = saving_file
+        
     information = reporting_portal(portal, username, password, export_path) 
 
     try:
