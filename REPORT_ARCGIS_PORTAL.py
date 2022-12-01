@@ -21,6 +21,7 @@ class reporting_portal():
 
         listRAW = []
         listService = []
+        listRAW_failed = []
         listUsers = gis.users.search(query=None)
         for user in listUsers:
             getUser = user['username']
@@ -35,55 +36,63 @@ class reporting_portal():
                 else:
                     if getItemType == 'Web Map' or getItemType == 'Dashboard':
                         for i in range(len(contentGIS)):
-                            getData = contentGIS[i]['title']
-                            getItem = contentGIS[i].id
-
-                            print(getItemType, getData, getItem)
-                            listLayerURL = []
                             try:
-                                getLayers = WebMap(contentGIS[i]).layers
-                                for layer in getLayers:
-                                    layerURL = layer['url']
-                                    listLayerURL.append(layerURL)
-                            except:
-                                listLayerURL = 'FAILED TO GET URL LIST'
+                                getData = contentGIS[i]['title']
+                                getItem = contentGIS[i].id
 
-                            itemStatus = Item(gis, contentGIS[i].id)
-                            shareStatus = itemStatus.shared_with
-                            shareStatus_Public = shareStatus['everyone']
-                            shareStatus_Org = shareStatus['org']
-                            shareStatus_Group = shareStatus['groups']
+                                print(getItemType, getData, getItem)
+                                listLayerURL = []
+                                try:
+                                    getLayers = WebMap(contentGIS[i]).layers
+                                    for layer in getLayers:
+                                        layerURL = layer['url']
+                                        listLayerURL.append(layerURL)
+                                except:
+                                    listLayerURL = 'FAILED TO GET URL LIST'
 
-                            rowDict = {'title': getData, 'type': getItemType, 'owner': getUser,
-                                    'url': contentGIS[i].homepage, 'itemid': contentGIS[i].id,
-                                    'shared_public': shareStatus_Public,
-                                    'shared_org': shareStatus_Org,
-                                    'shared_groups': str(shareStatus_Group),
-                                    'layers': '{}'.format(str(listLayerURL))}
-                            listService.append(rowDict)
-                            listRAW.append(contentGIS[i])
+                                itemStatus = Item(gis, contentGIS[i].id)
+                                shareStatus = itemStatus.shared_with
+                                shareStatus_Public = shareStatus['everyone']
+                                shareStatus_Org = shareStatus['org']
+                                shareStatus_Group = shareStatus['groups']
+
+                                rowDict = {'title': getData, 'type': getItemType, 'owner': getUser,
+                                        'url': contentGIS[i].homepage, 'itemid': contentGIS[i].id,
+                                        'shared_public': shareStatus_Public,
+                                        'shared_org': shareStatus_Org,
+                                        'shared_groups': str(shareStatus_Group),
+                                        'layers': '{}'.format(str(listLayerURL))}
+                                listService.append(rowDict)
+                                listRAW.append(contentGIS[i])
+                            except Exception as e:
+                                rowDict_Failed = {'title': getData, 'error':e}
+                                listRAW_failed.append(rowDict_Failed)
 
                     else:
                         for i in range(len(contentGIS)):
-                            getData = contentGIS[i]['title']
-                            getItem = contentGIS[i].id
+                            try:
+                                getData = contentGIS[i]['title']
+                                getItem = contentGIS[i].id
 
-                            print(getData, getItem)
-                            itemStatus = Item(gis, contentGIS[i].id)
-                            shareStatus = itemStatus.shared_with
-                            shareStatus_Public = shareStatus['everyone']
-                            shareStatus_Org = shareStatus['org']
-                            shareStatus_Group = shareStatus['groups']
+                                print(getData, getItem)
+                                itemStatus = Item(gis, contentGIS[i].id)
+                                shareStatus = itemStatus.shared_with
+                                shareStatus_Public = shareStatus['everyone']
+                                shareStatus_Org = shareStatus['org']
+                                shareStatus_Group = shareStatus['groups']
 
-                            rowDict = {'title': getData, 'type': getItemType, 'owner': getUser,
-                                    'url': contentGIS[i].url, 'itemid': contentGIS[i].id,
-                                    'shared_public': shareStatus_Public,
-                                    'shared_org': shareStatus_Org,
-                                    'shared_groups': str(shareStatus_Group),
-                                    'layers': None}
-                            listService.append(rowDict)
+                                rowDict = {'title': getData, 'type': getItemType, 'owner': getUser,
+                                        'url': contentGIS[i].url, 'itemid': contentGIS[i].id,
+                                        'shared_public': shareStatus_Public,
+                                        'shared_org': shareStatus_Org,
+                                        'shared_groups': str(shareStatus_Group),
+                                        'layers': None}
+                                listService.append(rowDict)
 
-                            listRAW.append(contentGIS[i])
+                                listRAW.append(contentGIS[i])
+                            except Exception as e:
+                                rowDict_Failed = {'title': getData, 'error':e}
+                                listRAW_failed.append(rowDict_Failed)
 
             print('============= {} ============='.format(getUser))
 
@@ -91,6 +100,10 @@ class reporting_portal():
                                     'shared_org', 'shared_groups','layers'])
         dfAppend = df.append(listService, ignore_index=True)
         dfAppend.to_csv(os.path.join(reportingPath, reportingFile+ '.csv'))
+
+        df_failed = pd.DataFrame(columns = ['title', 'error'])
+        df_failed_append = df_failed.append(listRAW_failed, ignore_index=True)
+        df_failed_append.to_csv(os.path.join(reportingPath, 'failed'+ '.csv'))
 
 
 if __name__ == '__main__':
