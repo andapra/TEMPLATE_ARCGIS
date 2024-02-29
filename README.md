@@ -7,6 +7,8 @@
  To use this script
  1. Run ArcGIS Pro Conda commandline
  2. Go the TEMPLATE_ARCGIS FOLDER in the commandline
- 3. type "python REPORT_ARCGIS_PORTAL.py"
+ 3. type "python REPORT_ARCGIS_PORTAL.py" for portal and "python REPORT_ARCGIS_SERVICE.py" for server  
+
+ Notes: ArcGIS Portal and Server must be federeted since it will using the administrator username of portal
 
  

@@ -15,12 +15,11 @@ class reporting_portal():
         gis = GIS(self.portal, self.username, self.password)
         reportingPath = self.reportingPath # change this path if you want to save other address
 
-        reportingFile = 'reporting'
+        reportingFile = 'reporting_portal'
         itemTypeGIS = ['Feature Layer', 'Geoprocessing Toolbox', 'Map Image Layer', 'Data Store', 'Web Map',
                 'Web Experience', 'Dashboard']
 
-        listRAW = []
-        listService = []
+        listService = list()
         listUsers = gis.users.search(query=None)
         for user in listUsers:
             getUser = user['username']
@@ -33,73 +32,73 @@ class reporting_portal():
                 if len(contentGIS) == 0:
                     pass
                 else:
-                    if getItemType == 'Web Map' or getItemType == 'Dashboard':
-                        for i in range(len(contentGIS)):
-                            getData = contentGIS[i]['title']
-                            getItem = contentGIS[i].id
+                    if getItemType == 'Web Map':
+                        for content in contentGIS:
+                            getData = content.title
+                            getItem = content.id
 
                             print(getItemType, getData, getItem)
                             listLayerURL = []
                             try:
-                                getLayers = WebMap(contentGIS[i]).layers
+                                getLayers = WebMap(content).layers
                                 for layer in getLayers:
                                     layerURL = layer['url']
                                     listLayerURL.append(layerURL)
                             except:
-                                listLayerURL = 'FAILED TO GET URL LIST'
+                                listLayerURL = ['FAILED TO GET URL LIST, PLEASE CHECK MANUAL']
 
-                            itemStatus = Item(gis, contentGIS[i].id)
+                            itemStatus = Item(gis, content.id)
                             shareStatus = itemStatus.shared_with
                             shareStatus_Public = shareStatus['everyone']
                             shareStatus_Org = shareStatus['org']
                             shareStatus_Group = shareStatus['groups']
 
                             rowDict = {'title': getData, 'type': getItemType, 'owner': getUser,
-                                    'url': contentGIS[i].homepage, 'itemid': contentGIS[i].id,
+                                    'url': content.homepage, 'itemid': content.id,
                                     'shared_public': shareStatus_Public,
                                     'shared_org': shareStatus_Org,
-                                    'shared_groups': str(shareStatus_Group),
-                                    'layers': '{}'.format(str(listLayerURL))}
-                            listService.append(rowDict)
-                            listRAW.append(contentGIS[i])
-
+                                    'shared_groups': ', '.join(shareStatus_Group),
+                                    'layers': ',\n'.join(listLayerURL)}
+                            
+                            df = pd.DataFrame.from_dict([rowDict])
+                            listService.append(df)
+                        
                     else:
-                        for i in range(len(contentGIS)):
-                            getData = contentGIS[i]['title']
-                            getItem = contentGIS[i].id
+                        for content in contentGIS:
+                            getData = content['title']
+                            getItem = content.id
 
                             print(getData, getItem)
-                            itemStatus = Item(gis, contentGIS[i].id)
+                            itemStatus = Item(gis, content.id)
                             shareStatus = itemStatus.shared_with
                             shareStatus_Public = shareStatus['everyone']
                             shareStatus_Org = shareStatus['org']
                             shareStatus_Group = shareStatus['groups']
 
                             rowDict = {'title': getData, 'type': getItemType, 'owner': getUser,
-                                    'url': contentGIS[i].url, 'itemid': contentGIS[i].id,
+                                    'url': content.url, 'itemid': content.id,
                                     'shared_public': shareStatus_Public,
                                     'shared_org': shareStatus_Org,
-                                    'shared_groups': str(shareStatus_Group),
+                                    'shared_groups': ', '.join(shareStatus_Group),
                                     'layers': None}
-                            listService.append(rowDict)
 
-                            listRAW.append(contentGIS[i])
+                            df = pd.DataFrame.from_dict([rowDict])
+                            listService.append(df)
 
             print('============= {} ============='.format(getUser))
 
-        df = pd.DataFrame(columns = ['title', 'type', 'owner', 'url', 'itemid', 'shared_public',
-                                    'shared_org', 'shared_groups','layers'])
-        dfAppend = df.append(listService, ignore_index=True)
-        dfAppend.to_csv(os.path.join(reportingPath, reportingFile+ '.csv'))
+        compile_df = pd.concat(listService).reset_index().drop(columns=['index'])
+        with pd.ExcelWriter(os.path.join(reportingPath, reportingFile+'.xlsx')) as writer:
+            compile_df.to_excel(writer, sheet_name='list_portal')
 
 
 if __name__ == '__main__':
     startTime = datetime.today()
 
     portal = input("Input portal url <example: https://gis.portal.com/webadaptor>: ") ## input portal url example: https://gis.portal.com/webadaptor
-    username = input("Input portal username: ") ## username portal that can access username
+    username = input("Input portal username: ") ## username portal that can has same previleges as administrator
     password = input("Input password: ") ## password of the username
-    saving_file = input("Input full path address <press enter if you wan to pass it to default in the current folder>: ")
+    saving_file = input("Input full path address <press enter if you want to pass it to default in the current folder>: ")
 
     if saving_file is None or saving_file == '':
         export_path = os.getcwd() 
